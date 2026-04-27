@@ -9,19 +9,35 @@ st.set_page_config(
     layout="centered"
 )
 st.title("🇮🇩 When Can You Stop Working?")
-st.write("Simulate when your savings can generate enough income to cover your monthly expenses.")
+st.caption("A simple simulation of your path to financial independence using Indonesian deposit assumptions.")
+
+st.markdown("---")
 
 # =========================
 # INPUT SECTION
 # =========================
 
-st.header("📥 Monthly Financial Data")
+st.header("📥 Your Financial Situation")
 
-current_savings = st.number_input("Current Savings (Rp)", value=100_000_000)
-monthly_income = st.number_input("Monthly Income (Rp)", value=10_000_000)
-monthly_expenses = st.number_input("Monthly Expenses (Rp)", value=6_000_000)
+col1, col2 = st.columns(2)
+
+with col1:
+    current_savings = st.number_input("Current Savings (Rp)", value=100_000_000)
+    monthly_income = st.number_input("Monthly Income (Rp)", value=10_000_000)
+
+with col2:
+    monthly_expenses = st.number_input("Monthly Expenses (Rp)", value=6_000_000)
+    deposit_rate = st.slider("Annual Deposit Rate (%)", 0.0, 10.0, 5.0) / 100
+
+tenor_months = st.selectbox(
+    "Deposit Duration",
+    [1, 3, 6, 12],
+    format_func=lambda x: f"{x} month(s)"
+)
 
 monthly_savings = monthly_income - monthly_expenses
+
+st.markdown("---")
 
 # =========================
 # DEPOSIT SETTINGS
@@ -97,10 +113,12 @@ months, df = simulate_months(
 
 st.header("📊 Results")
 
-monthly_yield = deposit_rate / 12 if deposit_rate > 0 else 0
-required_wealth = monthly_expenses / monthly_yield if monthly_yield > 0 else 0
+st.header("📊 Your Results")
 
 col1, col2 = st.columns(2)
+
+monthly_yield = deposit_rate / 12 if deposit_rate > 0 else 0
+required_wealth = monthly_expenses / monthly_yield if monthly_yield > 0 else 0
 
 with col1:
     st.metric("Required Wealth (Rp)", f"{required_wealth:,.0f}")
@@ -112,11 +130,14 @@ with col2:
 if months is not None:
     years = months // 12
     remaining_months = months % 12
-    st.success(f"🎯 Financial freedom in **{years} years {remaining_months} months**")
-else:
-    st.warning("⚠️ Not reached within simulation period")
 
-st.subheader("📌 What this means")
+    st.success(f"🎯 You can stop working in **{years} years {remaining_months} months**")
+else:
+    st.warning("⚠️ Financial freedom not reached within simulation period")
+
+st.markdown("---")
+
+st.header("📌 What this means")
 
 if months is not None:
     if years <= 5:
@@ -124,23 +145,22 @@ if months is not None:
     elif years <= 15:
         st.info("You're on track, but there’s room to optimize savings.")
     else:
-        st.warning("Your current strategy may take a long time. Consider increasing savings or return.")
+        st.warning("This may take a long time. Increasing savings will have a big impact.")
 
-# =========================
-# CHARTS
-# =========================
+    savings_rate = monthly_savings / monthly_income if monthly_income > 0 else 0
 
-st.subheader("📈 Net Worth Growth")
-st.line_chart(df.set_index("Month")["Net Worth"])
+    if savings_rate < 0.2:
+        st.warning("Your savings rate is quite low. Increasing it will significantly speed things up.")
+    else:
+        st.success("Your savings rate is strong. You're leveraging compounding well.")
 
-st.subheader("💸 Investment Income Growth")
-st.line_chart(df.set_index("Month")["Investment Income"])
+st.markdown("---")
 
 # =========================
 # SCENARIO COMPARISON
 # =========================
 
-st.header("🔍 Scenario Comparison")
+st.header("🔍 What if you save more?")
 
 increase_savings_pct = st.slider("Increase Savings (%)", 0, 100, 20)
 
@@ -164,9 +184,30 @@ with col1:
 
 with col2:
     if months_new:
-        st.metric("Improved Savings", f"{months_new//12}y {months_new%12}m")
+        st.metric("Improved Plan", f"{months_new//12}y {months_new%12}m")
     else:
-        st.metric("Improved Savings", "Not reached")
+        st.metric("Improved Plan", "Not reached")
+
+if months is not None and months_new is not None:
+    diff = months - months_new
+    st.write(
+        f"If you increase your savings, you can reach financial freedom "
+        f"**{diff//12} years {diff%12} months faster**."
+    )
+
+st.markdown("---")
+
+# =========================
+# CHARTS
+# =========================
+
+st.header("📈 Growth Over Time")
+
+st.subheader("📈 Net Worth Growth")
+st.line_chart(df.set_index("Month")["Net Worth"])
+
+st.subheader("💸 Investment Income Growth")
+st.line_chart(df.set_index("Month")["Investment Income"])
 
 # =========================
 # INSIGHT SECTION
@@ -174,10 +215,15 @@ with col2:
 
 st.header("🧠 Insight")
 
-if months and months_new:
+if months is not None and months_new is not None:
     diff = months - months_new
-    st.write(f"Increasing savings helps you reach freedom **{diff//12} years {diff%12} months faster**.")
 
+    st.subheader("📌 What this means")
+
+    st.write(
+        f"If you increase your savings by 20%, you can reach financial freedom "
+        f"**{diff//12} years {diff%12} months faster**."
+    )
 st.write("Financial freedom = investment income ≥ monthly expenses.")
 
 # =========================
