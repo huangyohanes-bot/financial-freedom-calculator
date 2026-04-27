@@ -99,7 +99,7 @@ months, df = simulate_months(
 
 st.header("📊 Results")
 
-st.header("📊 Your Results")
+st.subheader("📊 Your Results")
 
 col1, col2 = st.columns(2)
 
