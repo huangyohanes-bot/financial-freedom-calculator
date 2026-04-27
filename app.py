@@ -8,8 +8,7 @@ st.set_page_config(
     page_title="Financial Freedom Calculator",
     layout="centered"
 )
-
-st.title("💰 Financial Freedom Calculator")
+st.title("🇮🇩 When Can You Stop Working?")
 st.write("Simulate when your savings can generate enough income to cover your monthly expenses.")
 
 # =========================
@@ -101,8 +100,14 @@ st.header("📊 Results")
 monthly_yield = deposit_rate / 12 if deposit_rate > 0 else 0
 required_wealth = monthly_expenses / monthly_yield if monthly_yield > 0 else 0
 
-st.metric("Required Wealth (Rp)", f"{required_wealth:,.0f}")
-st.metric("Monthly Savings (Rp)", f"{monthly_savings:,.0f}")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.metric("Required Wealth (Rp)", f"{required_wealth:,.0f}")
+    st.caption("Amount needed so investment income covers expenses")
+
+with col2:
+    st.metric("Monthly Savings (Rp)", f"{monthly_savings:,.0f}")
 
 if months is not None:
     years = months // 12
@@ -110,6 +115,16 @@ if months is not None:
     st.success(f"🎯 Financial freedom in **{years} years {remaining_months} months**")
 else:
     st.warning("⚠️ Not reached within simulation period")
+
+st.subheader("📌 What this means")
+
+if months is not None:
+    if years <= 5:
+        st.success("You're on a very strong path to financial freedom.")
+    elif years <= 15:
+        st.info("You're on track, but there’s room to optimize savings.")
+    else:
+        st.warning("Your current strategy may take a long time. Consider increasing savings or return.")
 
 # =========================
 # CHARTS
