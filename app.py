@@ -40,20 +40,6 @@ monthly_savings = monthly_income - monthly_expenses
 st.markdown("---")
 
 # =========================
-# DEPOSIT SETTINGS
-# =========================
-
-st.header("🏦 Deposit Settings")
-
-deposit_rate = st.slider("Annual Deposit Rate (%)", 0.0, 10.0, 5.0) / 100
-
-tenor_months = st.selectbox(
-    "Deposit Duration",
-    [1, 3, 6, 12],
-    format_func=lambda x: f"{x} month(s)"
-)
-
-# =========================
 # SIMULATION FUNCTION
 # =========================
 
